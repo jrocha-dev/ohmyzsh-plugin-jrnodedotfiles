@@ -108,7 +108,7 @@ EOL
   msg_file_created "$project_path" "$project_type"
 }
 
-create_stylelintrc() {
+function create_stylelintrc {
   local project_path="${1:-.}"              # Default to current directory
   local project_type=$(choose_project_type) # Choose project type
 
@@ -139,6 +139,21 @@ module.exports = {
 EOL
 
   msg_file_created "$project_path" "$project_type"
+}
+
+function create_eslintrc {
+  local project_path="${1:-.}"              # Default to current directory
+  local project_type=$(choose_project_type) # Choose project type
+
+  # if eslint is not a dev dependency or file is not present, initialize eslint configuration
+
+  if ! npm list eslint --depth=0 | grep -q 'eslint' || [ ! -f "$project_path/.eslintrc.config.js" ]; then
+    echo "ESLint is not configured. Initializing ESLint configuration..."
+    npm init @eslint/config@latest
+  fi
+
+  msg_file_created "$project_path" "$project_type"
+
 }
 
 alias jr-cdf=create_dot_files
