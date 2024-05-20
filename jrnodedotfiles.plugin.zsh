@@ -27,6 +27,17 @@ function msg_file_created { # $1 = project_path, $2 = project_type
   ) project"
 }
 
+function create_dot_files {
+
+  local project_path="${1:-.}" # Default to current directory
+
+  create_editorconfig "$project_path"
+  create_gitignore "$project_path"
+  create_eslintrc "$project_path"
+  create_prettierrc "$project_path"
+
+}
+
 function create_editorconfig {
   local project_path="${1:-.}"              # Default to current directory
   local project_type=$(choose_project_type) # Choose project type
@@ -97,4 +108,37 @@ EOL
   msg_file_created "$project_path" "$project_type"
 }
 
-alias jr-create-editorconfig="create_editorconfig"
+create_stylelintrc() {
+  local project_path="${1:-.}"              # Default to current directory
+  local project_type=$(choose_project_type) # Choose project type
+
+  if [ -f "$project_path/.stylelintrc.js" ]; then
+    echo ".stylelintrc.js already exists in $project_path"
+    return
+  fi
+
+  # Verify if packages for stylelint are instaled and install them if not
+  if ! command -v stylelint &>/dev/null; then
+    echo "stylelint is not installed. Installing..."
+    npm install --save-dev stylelint stylelint-config-standard-scss stylelint-prettier
+  fi
+
+  cat <<EOL >"$project_path/.stylelintrc.js"
+module.exports = {
+  extends: [
+    'stylelint-config-standard-scss',
+    'stylelint-prettier',
+  ],
+  plugins: [
+    'stylelint-scss',
+    'stylelint-prettier',
+  rules: {
+    'prettier/prettier': true
+  },
+}
+EOL
+
+  msg_file_created "$project_path" "$project_type"
+}
+
+alias jr-cdf=create_dot_files
