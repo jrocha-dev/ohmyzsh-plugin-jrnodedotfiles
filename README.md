@@ -45,10 +45,11 @@ choice is sent to functions that create the selected configuration files. These 
 - `create_browserlistrc`: Generates a `.browserslistrc` file for Babel and Autoprefixer.
 - `create_babelrc`: Generates a `.babelrc` file for transpiling JavaScript and TypeScript into
   browser-compatible code.
-- `create_webpack`: Generates a `webpack.config.js` for module bundling and transpiling.
-- `create_gulp`: Generates a `gulpfile.js` for task automation.
-- `create_vite`: Generates a `vite.config.js` file for Vue and React projects.
+- `create_postcssrc`: Generates a `postcss.config.js` file for PostCSS configuration.
 - `create_tsconfig`: Generates a `tsconfig.json` file for TypeScript projects.
+- `create_webpack`: Generates a `webpack.config.js` for module bundling and transpiling.
+- `create_vite`: Generates a `vite.config.js` file for Vue and React projects.
+- `create_gulp`: Generates a `gulpfile.js` for task automation.
 - `create_docker-compose`: Generates a `docker-compose.yml` file to unify the development environment.
 - `create_test_files`:
   - Configure Cypress for BDD and E2E, and Jest for TDD/Unit testing in React, Vue, and Angular projects;
