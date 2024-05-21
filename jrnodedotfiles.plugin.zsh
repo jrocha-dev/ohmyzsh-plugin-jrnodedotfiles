@@ -29,25 +29,55 @@ function msg_file_created { # $1 = project_path, $2 = project_type
 
 function create_dot_files {
 
-  local project_path="${1:-.}" # Default to current directory
-
-  create_editorconfig "$project_path"
-  create_gitignore "$project_path"
-  create_eslintrc "$project_path"
-  create_prettierrc "$project_path"
-
-}
-
-function create_editorconfig {
   local project_path="${1:-.}"              # Default to current directory
   local project_type=$(choose_project_type) # Choose project type
+
+  if [ -z "$project_type" ]; then
+    echo "Invalid project type"
+    return
+  fi
+
+  # Code formatting
+  create_editorconfig "$project_path $project_type"
+  create_prettierrc "$project_path $project_type"
+  # Linting
+  create_stylelintrc "$project_path $project_type"
+  create_eslintrc "$project_path $project_type"
+
+  # Browser compatibility
+  create_browserlistrc "$project_path $project_type"
+  create_babelrc "$project_path $project_type"
+  create_postcssrc "$project_path $project_type"
+  create_tsconfig "$project_path $project_type"
+
+  # Build tools
+  create_webpack "$project_path $project_type"
+  create_vite "$project_path $project_type"
+
+  # Automation
+  create_gulp "$project_path $project_type"
+
+  # Docker
+  create_dockerfile "$project_path $project_type"
+  create_docker-compose "$project_path $project_type"
+
+  # Testing
+  create_test_files "$project_path $project_type"
+}
+
+# ------------------------------------------------------------------------------
+
+function create_editorconfig {
+  local project_path="${1:-.}" # Default to current directory
+  local project_type="${2}"    # Project type
 
   if [ -f "$project_path/.editorconfig" ]; then
     echo ".editorconfig already exists in $project_path"
     return
   fi
 
-  # Create the basic structure of the .editorconfig file
+  # Common .editorconfig settings
+
   cat <<EOL >"$project_path/.editorconfig"
 # .editorconfig for project
 root = true
@@ -61,56 +91,37 @@ trim_trailing_whitespace = true
 insert_final_newline = true
 EOL
 
-  case $project_type in
-  # Vue with and without TS
-  1 | 2)
-    cat <<EOL >>"$project_path/.editorconfig"
+  # Add file extensions based on project type
 
-[*.{js,ts,vue,css,scss}]
-indent_style = space
-indent_size = 2
-EOL
-    ;;
-  # Angular
-  3)
-    cat <<EOL >>"$project_path/.editorconfig"
-
-[*.{ts,html,css,scss}]
-indent_style = space
-indent_size = 2
-EOL
-    ;;
-  # React with and without TS
-  4 | 5)
-    cat <<EOL >>"$project_path/.editorconfig"
-
-[*.{js,jsx,ts,tsx,css,scss}]
-indent_style = space
-indent_size = 2
-EOL
-    ;;
-  # Node/API
-  6)
-    cat <<EOL >>"$project_path/.editorconfig"
-
-[*.{js,json}]
-indent_style = space
-indent_size = 2
-EOL
-    ;;
-  *)
+  if [ $project_type -eq 1 ] || [ $project_type -eq 2 ]; then
+    echo [*.{js,ts,vue,css,scss}] >>"$project_path/.editorconfig"
+  elif [ $project_type -eq 3 ]; then
+    echo [*.{ts,html,css,scss}] >>"$project_path/.editorconfig"
+  elif [ $project_type -eq 4 ] || [ $project_type -eq 5 ]; then
+    echo [*.{js,jsx,ts,tsx,css,scss}] >>"$project_path/.editorconfig"
+  elif [ $project_type -eq 6 ]; then
+    echo [*.{js,json}] >>"$project_path/.editorconfig"
+  else
     echo "Invalid project type"
     rm "$project_path/.editorconfig"
     return
-    ;;
-  esac
+  fi
+
+  # More common .editorconfig settings
+
+  echo "indent_style = space" >>"$project_path/.editorconfig"
+  echo "indent_size = 2" >>"$project_path/.editorconfig"
+
+  # Inform user that file was created
 
   msg_file_created "$project_path" "$project_type"
 }
 
+# ------------------------------------------------------------------------------
+
 function create_stylelintrc {
-  local project_path="${1:-.}"              # Default to current directory
-  local project_type=$(choose_project_type) # Choose project type
+  local project_path="${1:-.}" # Default to current directory
+  local project_type="${2}"    # Project type
 
   if [ -f "$project_path/.stylelintrc.js" ]; then
     echo ".stylelintrc.js already exists in $project_path"
@@ -141,9 +152,11 @@ EOL
   msg_file_created "$project_path" "$project_type"
 }
 
+# ------------------------------------------------------------------------------
+
 function create_eslintrc {
-  local project_path="${1:-.}"              # Default to current directory
-  local project_type=$(choose_project_type) # Choose project type
+  local project_path="${1:-.}" # Default to current directory
+  local project_type="${2}"    # Project type
 
   # if eslint is not a dev dependency or file is not present, initialize eslint configuration
 
@@ -156,4 +169,31 @@ function create_eslintrc {
 
 }
 
+# ------------------------------------------------------------------------------
+
+function crete_browserlistrc {
+  local project_path="${1:-.}" # Default to current directory
+  local project_type="${2}"    # Project type
+
+  if [ -f "$project_path/.browserlistrc" ]; then
+    echo ".browserlistrc already exists in $project_path"
+    return
+  fi
+
+  if [ project_type -eq 6 ]; then
+    echo "Node/API project does not require .browserlistrc"
+    return
+  fi
+
+  cat <<EOL >"$project_path/.browserlistrc"
+# Browserslist configuration
+fully supports webp and fully supports flexbox-gap
+EOL
+
+  msg_file_created "$project_path" "$project_type"
+
+}
+
 alias jr-cdf=create_dot_files
+
+# ------------------------------------------------------------------------------
