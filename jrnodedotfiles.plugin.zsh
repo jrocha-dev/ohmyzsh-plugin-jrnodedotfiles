@@ -38,31 +38,31 @@ function create_dot_files {
   fi
 
   # Code formatting
-  create_editorconfig "$project_path $project_type"
-  create_prettierrc "$project_path $project_type"
+  create_editorconfig "$project_path" "$project_type"
+  create_prettierrc "$project_path" "$project_type"
   # Linting
-  create_stylelintrc "$project_path $project_type"
-  create_eslintrc "$project_path $project_type"
+  create_stylelintrc "$project_path" "$project_type"
+  create_eslintrc "$project_path" "$project_type"
 
   # Browser compatibility
-  create_browserlistrc "$project_path $project_type"
-  create_babelrc "$project_path $project_type"
-  create_postcssrc "$project_path $project_type"
-  create_tsconfig "$project_path $project_type"
+  create_browserlistrc "$project_path" "$project_type"
+  create_babelrc "$project_path" "$project_type"
+  create_postcssrc "$project_path" "$project_type"
+  create_tsconfig "$project_path" "$project_type"
 
   # Build tools
-  create_webpack "$project_path $project_type"
-  create_vite "$project_path $project_type"
+  create_webpack "$project_path" "$project_type"
+  create_vite "$project_path" "$project_type"
 
   # Automation
-  create_gulp "$project_path $project_type"
+  create_gulp "$project_path" "$project_type"
 
   # Docker
-  create_dockerfile "$project_path $project_type"
-  create_docker-compose "$project_path $project_type"
+  create_dockerfile "$project_path" "$project_type"
+  create_docker-compose "$project_path" "$project_type"
 
   # Testing
-  create_test_files "$project_path $project_type"
+  create_test_files "$project_path" "$project_type"
 }
 
 # ------------------------------------------------------------------------------
@@ -96,7 +96,7 @@ EOL
   if [ $project_type -eq 1 ] || [ $project_type -eq 2 ]; then
     echo [*.{js,ts,vue,css,scss}] >>"$project_path/.editorconfig"
   elif [ $project_type -eq 3 ]; then
-    echo [*.{ts,html,css,scss}] >>"$project_path/.editorconfig"
+    echo [*.{ts,component.html,css,scss}] >>"$project_path/.editorconfig" #
   elif [ $project_type -eq 4 ] || [ $project_type -eq 5 ]; then
     echo [*.{js,jsx,ts,tsx,css,scss}] >>"$project_path/.editorconfig"
   elif [ $project_type -eq 6 ]; then
@@ -113,6 +113,42 @@ EOL
   echo "indent_size = 2" >>"$project_path/.editorconfig"
 
   # Inform user that file was created
+
+  msg_file_created "$project_path" "$project_type"
+}
+
+# ------------------------------------------------------------------------------
+
+function create_prettierrc {
+  local project_path="${1:-.}" # Default to current directory
+  local project_type="${2}"    # Project type
+
+  if [ -f "$project_path/.prettierrc" ]; then
+    echo ".prettierrc already exists in $project_path"
+    return
+  fi
+
+  # create a .prettierrc file compatible with Airbnb style guide
+  cat <<EOL >"$project_path/.prettierrc.js"
+module.exports = {
+  quoteProps: 'as-needed', // 3.6
+  bracketSameLine: false, // 4.8*
+  jsxBracketSameLine: false, // 4.8*
+  singleQuote: true, // 6.1
+  trailingComma: 'all', // 7.15
+  arrowParens: 'always', // 8.4
+  tabWidth: 2, // 19.1
+  useTabs: false, // 19.1
+  bracketSpacing: true, // 19.12
+  printWidth: 100, // 19.13
+  semi: true, // 21.1
+  
+  vueIndentScriptAndStyle: true,
+  singleAttributePerLine: true,
+  htmlWhitespaceSensitivity: 'css',
+  endOfLine: 'lf',
+}
+EOL
 
   msg_file_created "$project_path" "$project_type"
 }
@@ -143,8 +179,9 @@ module.exports = {
   plugins: [
     'stylelint-scss',
     'stylelint-prettier',
+  ],
   rules: {
-    'prettier/prettier': true
+    'prettier/prettier': true,
   },
 }
 EOL
@@ -171,7 +208,7 @@ function create_eslintrc {
 
 # ------------------------------------------------------------------------------
 
-function crete_browserlistrc {
+function create_browserlistrc {
   local project_path="${1:-.}" # Default to current directory
   local project_type="${2}"    # Project type
 
@@ -180,7 +217,7 @@ function crete_browserlistrc {
     return
   fi
 
-  if [ project_type -eq 6 ]; then
+  if [ $project_type -eq 6 ]; then
     echo "Node/API project does not require .browserlistrc"
     return
   fi
@@ -194,6 +231,6 @@ EOL
 
 }
 
-alias jr-cdf=create_dot_files
-
 # ------------------------------------------------------------------------------
+
+alias jr-cdf=create_dot_files
