@@ -233,4 +233,43 @@ EOL
 
 # ------------------------------------------------------------------------------
 
+function create_babelrc {
+  local project_path="${1:-.}" # Default to current directory
+  local project_type="${2}"    # Project type
+
+  if [ -f "$project_path/.babel.config.js" ]; then
+    echo ".babel.config.js already exists in $project_path"
+    return
+  fi
+
+  if [ $project_type -eq 6 ]; then
+    echo "Node/API project does not require .babel.config.js"
+    return
+  fi
+
+  # Initialize .babel.config.js with the base presets and plugins
+  cat <<EOL >"$project_path/.babel.config.js"
+module.exports = {
+  presets: ['@babel/preset-env'$(
+    case $project_type in
+    1) echo ", '@vue/babel-preset-app'" ;;
+    2) echo ", '@vue/babel-preset-app', '@babel/preset-typescript'" ;;
+    4) echo ", '@babel/preset-react'" ;;
+    5) echo ", '@babel/preset-react', '@babel/preset-typescript'" ;;
+    esac
+  )],
+  plugins: ['@babel/plugin-transform-runtime'$(
+    case $project_type in
+    3) echo ", '@babel/plugin-proposal-decorators', '@babel/plugin-proposal-class-properties'" ;;
+    esac
+  )]
+};
+EOL
+
+  msg_file_created "$project_path" "$project_type"
+
+}
+
+# ------------------------------------------------------------------------------
+
 alias jr-cdf=create_dot_files
