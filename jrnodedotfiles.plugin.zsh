@@ -272,4 +272,56 @@ EOL
 
 # ------------------------------------------------------------------------------
 
+function create_postcssrc {
+  local project_path="${1:-.}" # Default to current directory
+  local project_type="${2}"    # Project type
+
+  if [ -f "$project_path/postcss.config.js" ]; then
+    echo "postcss.config.js already exists in $project_path"
+    return
+  fi
+
+  if [ $project_type -eq 6 ]; then
+    echo "Node/API project does not require postcss.config.js"
+    return
+  fi
+
+  cat <<EOL >"$project_path/postcss.config.js"
+module.exports = {
+  plugins: [
+    require('autoprefixer'),
+    require('postcss-nested'),
+    require('postcss-import'),
+    require('postcss-preset-env')({
+      stage: 1,
+      features: {
+        'nesting-rules': true, 
+      },
+    }),
+    require('postcss-flexbugs-fixes'),
+    require('postcss-normalize'),
+    require('postcss-sorting'),
+    require('cssnano'),
+    require('stylelint'),
+    require('postcss-color-function'),
+    require('postcss-custom-properties')
+    require('postcss-moodules'),
+    // Additional plugins for CSS-in-JS
+    require('postcss-html'),
+    require('postcss-jsx'),
+    require('postcss-js'),
+    // Add SCSS/SASS support for all projects
+    require('postcss-scss'),
+    require('postcss-sass'),
+  ],
+};
+
+EOL
+
+  msg_file_created "$project_path" "$project_type"
+
+}
+
+# ------------------------------------------------------------------------------
+
 alias jr-cdf=create_dot_files
