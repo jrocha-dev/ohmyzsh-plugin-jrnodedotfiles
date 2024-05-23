@@ -324,4 +324,92 @@ EOL
 
 # ------------------------------------------------------------------------------
 
+function create_tsconfig {
+
+  local project_path="${1:-.}" # Default to current directory
+  local project_type="${2}"    # Project type
+
+  if [ -f "$project_path/tsconfig.json" ]; then
+    echo "tsconfig.json already exists in $project_path"
+    return
+  fi
+
+  if [ $project_type -eq 1 ] || [ $project_type -eq 4 ]; then
+    echo "Vue and React projects do not require tsconfig.json"
+    return
+  fi
+
+  # Initialize tsconfig.json with the base configuration
+  cat <<EOL >"$project_path/tsconfig.json"
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "sourceMap": true,
+EOL
+
+  # Add specific configurations based on project type
+  case $project_type in
+  1)
+    # Vue with TypeScript
+    cat <<EOL >>"$project_path/tsconfig.json"
+    "jsx": "preserve",
+    "lib": ["esnext", "dom"],
+    "types": ["vite/client"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
+  "exclude": ["node_modules"],
+  "vueCompilerOptions": {
+    "target": 3.2
+  }
+}
+EOL
+    ;;
+  2)
+    # Angular with TypeScript
+    cat <<EOL >>"$project_path/tsconfig.json"
+    "lib": ["es2018", "dom"],
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"],
+  "angularCompilerOptions": {
+    "enableIvy": true,
+    "fullTemplateTypeCheck": true,
+    "strictInjectionParameters": true,
+    "strictTemplates": true,
+    "strictInputAccessModifiers": true,
+    "strictOutputEventTypes": true,
+    "strictDomEventTypes": true,
+  }
+}
+EOL
+    ;;
+  3)
+    # React with TypeScript
+    cat <<EOL >>"$project_path/tsconfig.json"
+    "jsx": "react-jsx",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["node", "jest"]
+  }
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
+EOL
+    ;;
+  esac
+
+  msg_file_created "$project_path" "$project_type"
+}
+
+# ------------------------------------------------------------------------------
+
 alias jr-cdf=create_dot_files
